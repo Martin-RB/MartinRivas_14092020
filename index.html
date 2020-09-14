@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div id="app">
+            <ul class="nav justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link active" data-page="home" v-on:click="onNavClick">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="projects" v-on:click="onNavClick">Projects</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="services" v-on:click="onNavClick">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="contact" v-on:click="onNavClick">Contact</a>
+                </li>
+            </ul>
+            <m-home v-if='actualPage == "home"'></m-home>
+            <m-projects v-if='actualPage == "projects"'
+                        v-bind:list="imageList"
+                        v-bind:detailClass="detailClass"
+                        v-bind:on-sort-change="onSortChange"></m-projects>
+            <m-services v-if='actualPage == "services"'
+                        v-bind:services="services"
+                        v-bind:total="total"
+                        v-bind:on-service-click="onServiceClick"></m-services>
+            <m-contact v-if='actualPage == "contact"'></m-contact>
+        </div>
+        <!--<div class="list-group">
+            
+            <a href="#" class="list-group-item list-group-item-action active">Cras justo odio</a>
+            <a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>
+            <a href="#" class="list-group-item list-group-item-action">Morbi leo risus</a>
+            <a href="#" class="list-group-item list-group-item-action">Porta ac consectetur ac</a>
+            <a href="#" class="list-group-item list-group-item-action disabled" tabindex="-1" aria-disabled="true">Vestibulum at eros</a>
+        </div>-->
+        
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+
+
+
+        Vue.component("image-detail-list", {
+            props: ["list", "detailClass"],
+            template: `
+                <div v-bind:class="detailClass">
+                    <div v-for="element in list" class="p--element">
+                        <div class="element--image"><img v-bind:src="element.img" class="image"/></div>
+                        <div class="element--text">{{element.text}}</div>
+                    </div>
+                </div>
+            `
+        });
+        Vue.component("srvice-element", {
+            template: `
+                <button v-bind:class="classname" v-on:click="onClick(id, isSelected)">
+                    {{text}}: {{cost}}
+                </button>
+            `,
+            props: ["id", "isSelected", "text", "classname", "on-click", "cost"]
+        });
+
+        Vue.component("m-home", {
+            template: `
+                <div>
+                    <h1>Inicio</h1>
+                    <p>Esta es la pagina de inicio.</p>
+                    <p>Adjunto perrito</p>
+                    <img src="doggo.jpg" style="width:100%;"/>
+                </div>
+            `
+        })
+        Vue.component("m-projects", {
+            template: `
+                <div>
+                    <h1>Projectos</h1>
+                    <div class="bg-info projects--list-header">
+                        <div class="projects--list-header--item" v-on:click="onSortChange('grid')"><i class="fa fa-th" aria-hidden="true"></i></div>
+                        <div class="projects--list-header--item" v-on:click="onSortChange('list')"><i class="fa fa-th-list" aria-hidden="true"></i></div>
+                    </div>
+                    <div class="projects--list-container">
+                        <image-detail-list v-bind:list="list" v-bind:detailClass="detailClass"/>
+                    </div>
+                </div>
+            `,
+            props: ["list", "detailClass", "on-sort-change"]
+        })
+        Vue.component("m-services", {
+            template: `
+                <div>
+                    <h1>Servicios</h1>
+                    <div class="container" v-for="el in services">
+                        <srvice-element v-bind:text="el.text" 
+                                        v-bind:classname="el.classname"
+                                        v-bind:id="el.id"
+                                        v-bind:is-selected="el.isSelected"
+                                        v-bind:on-click="onServiceClick"
+                                        v-bind:cost="el.cost"/>
+                    </div>
+                    <p>{{total}}</p>
+                </div>
+            `,
+            props: ["services", "total", "on-service-click"]
+        });
+        Vue.component("m-contact", {
+            template: `
+                <div>
+                    <h1>Contacto</h1>
+                    <p>Pagina de facebook: <a href="www.facebook.com">Facebook.com</a></p>
+                    <p>Linkedin: <a href="www.linkedin.com">Linkedin.com</a></p>
+                </div>
+            `
+        })
+
+        var v = new Vue({
+            el: "#app",
+            data: {
+                actualPage: "home",
+                imageList: [
+                    {text:"hola", img:"aguacate1.jpg"}, 
+                    {text:"aloh", img:"aguacate2.jpg"}, 
+                    {text:"laho", img:"aguacate3.jpg"},
+                    {text:"hola", img:"aguacate1.jpg"}, 
+                    {text:"aloh", img:"aguacate2.jpg"}, 
+                    {text:"laho", img:"aguacate3.jpg"},
+                    {text:"hola", img:"aguacate1.jpg"}, 
+                    {text:"aloh", img:"aguacate2.jpg"}, 
+                ],
+                projects_isGrid: false,
+                detailClass: "projects-list projects-scrollable",
+                onSortChange: function(type){
+                    if(type == "list"){
+                        this.detailClass = "projects-list projects-scrollable";
+                    }
+                    else{
+                        this.detailClass = "projects-grid projects-scrollable";
+                    }
+                },
+                services: [
+                    {id: 0, text: "idk1", cost: 100, isSelected: false, classname: ""},
+                    {id: 1, text: "idk2", cost: 200, isSelected: false, classname: ""},
+                    {id: 2, text: "idk3", cost: 300, isSelected: false, classname: ""},
+                    {id: 3, text: "idk4", cost: 400, isSelected: false, classname: ""},
+                    {id: 4, text: "idk5", cost: 500, isSelected: false, classname: ""},
+                ],
+                total: 0,
+                onServiceClick: function(id, isSelected){
+                    console.log(v.services);
+                    
+                    console.log(id, isSelected);
+                    let service = v.services[id];
+                    service.isSelected = !service.isSelected;
+                    if(service.isSelected === true){
+                        v.total += service.cost;
+                        service.classname =  "bg-success";
+                    }
+                    else{
+                        v.total -= service.cost;
+                        service.classname =  "";
+                    }
+
+                    v.services[id] = service;
+                }
+            },
+            methods: {
+                onNavClick: function (e) {
+                    let page = $(e.target).data("page");
+                    this.actualPage = page;
+                },
+            }
+        })
+    </script>
+</body>
+</html>
